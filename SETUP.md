@@ -6,20 +6,28 @@
 ## 1. Local LLMs (Ollama)
 ... (existing Ollama content) ...
 
-## 2. FFmpeg (Required for Voice)
-ShadowDragon needs FFmpeg to process audio.
-1. Download from [ffmpeg.org](https://ffmpeg.org/download.html) or [gyan.dev](https://www.gyan.dev/ffmpeg/builds/).
-2. Extract and add the `bin` folder to your **System PATH**.
-3. **Restart your computer** after adding it to PATH.
-4. Verify by running `ffmpeg -version` in a terminal.
+## 2. FFmpeg (REQUIRED)
+Whisper cannot "hear" without FFmpeg. **Follow these steps exactly:**
+1. **Download**: Go to [gyan.dev](https://www.gyan.dev/ffmpeg/builds/ffmpeg-git-essentials.7z) and download the file.
+2. **Extract**: Use 7-Zip or WinRAR to extract it to `C:\ffmpeg`.
+3. **Add to PATH**:
+   - Search for "Environment Variables" in your Start Menu.
+   - Click "Environment Variables" button.
+   - Under "System Variables", find **Path**, select it, and click **Edit**.
+   - Click **New** and paste: `C:\ffmpeg\bin`
+   - Click OK on all windows.
+4. **Restart**: **You MUST restart your Terminal or VS Code** for this to work.
 
 ## 3. Text-to-Speech (Piper)
 You can now install Piper via pip:
 ```bash
-pip install piper-tts
+pip install piper-tts pathvalidate
 ```
-Then, download a voice model (`.onnx` file) from the [Piper samples](https://github.com/rhasspy/piper#samples).
-Place the model (e.g., `en_GB-alan-low.onnx`) in the `shadowdragon/` directory, or update `PIPER_MODEL` in `config.py`.
+Then, download **BOTH** the voice model files from the [Piper samples](https://github.com/rhasspy/piper#samples):
+1. The `.onnx` file (e.g., `en_US-john-medium.onnx`)
+2. The `.json` file (e.g., `en_US-john-medium.onnx.json`)
+
+**Both files must be in the same folder** (put them in the `shadowdragon/` directory).
 
 ## 3. OCR (Tesseract)
 Install [Tesseract OCR for Windows](https://github.com/UB-Mannheim/tesseract/wiki).

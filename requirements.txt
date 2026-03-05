@@ -8,3 +8,4 @@ fuzzywuzzy
 python-dotenv
 levenshtein
 piper-tts
+pathvalidate
