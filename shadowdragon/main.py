@@ -32,19 +32,40 @@ class ShadowDragon:
 
     def run(self):
         print("ShadowDragon is online.")
+        
+        # Quick Ollama Check
+        try:
+            requests.get("http://localhost:11434", timeout=1)
+        except:
+            print("CRITICAL: Ollama is NOT running! Please start the Ollama app.")
+            self.speech.speak("Warning: My brain is offline. Please start Ollama.")
+            # We don't exit, but warn the user
+
         self.speech.speak("ShadowDragon is online.")
         
         while True:
             # Stage 1: Continuous Listening for Wake Word or Conversation Mode
             if not self.conv_mgr.is_active:
-                print(f"Waiting for wake word '{WAKE_WORD}'...")
-                text = self.listener.listen(duration=2).lower()
-                if WAKE_WORD not in text:
+                print(f"Waiting for wake word...")
+                # Use 'tiny' model for fast wake word detection
+                text = self.listener.listen(duration=2.0, use_base=False).lower()
+                
+                if not text:
                     continue
-                command = text.split(WAKE_WORD)[-1].strip()
+                
+                # Broad matching for speed
+                is_wake = any(w in text for w in ["shadow", "dragon", "shadowdragon"])
+                
+                if is_wake:
+                    command = text.replace("shadow dragon", "shadowdragon").split("shadowdragon")[-1].strip()
+                    if not command or len(command) < 3:
+                        self.speech.speak("Yes?")
+                        command = self.listener.listen(duration=4, use_base=True)
+                else:
+                    continue
             else:
                 # Conversation mode - active listening
-                command = self.listener.listen(duration=3)
+                command = self.listener.listen(duration=4)
             
             if not command:
                 continue
@@ -59,7 +80,10 @@ class ShadowDragon:
             self.process_intent(intent, command)
 
     def process_intent(self, intent, command):
-        if intent == "START_CONVERSATION":
+        # Normalize command for checks
+        cmd_clean = command.lower().replace("shadow dragon", "shadowdragon")
+        
+        if intent == "START_CONVERSATION" or "talk" in command.lower():
             self.conv_mgr.start()
             response = "Sure. What would you like to talk about?"
             self.speech.speak(response)
