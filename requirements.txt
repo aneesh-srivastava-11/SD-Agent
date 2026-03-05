@@ -1,0 +1,10 @@
+# Dependencies for ShadowDragon
+openai-whisper
+pyaudio
+requests
+pyautogui
+pytesseract
+fuzzywuzzy
+python-dotenv
+levenshtein
+piper-tts
