@@ -19,8 +19,18 @@ class MemoryStore:
     def save_memory(self, key, value):
         self.data[key] = value
         os.makedirs(os.path.dirname(self.memory_path), exist_ok=True)
-        with open(self.memory_path, 'w') as f:
-            json.dump(self.data, f, indent=4)
+        temp_path = self.memory_path + ".tmp"
+        try:
+            with open(temp_path, 'w') as f:
+                json.dump(self.data, f, indent=4)
+            os.replace(temp_path, self.memory_path)
+        except Exception as e:
+            print(f"Error saving memory atomically: {e}")
+            if os.path.exists(temp_path):
+                try:
+                    os.remove(temp_path)
+                except:
+                    pass
 
     def get_memory(self, key=None):
         if key:

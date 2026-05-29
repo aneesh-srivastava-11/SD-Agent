@@ -1,5 +1,6 @@
 import subprocess
 import os
+import winsound
 from shadowdragon.config import PIPER_EXE, PIPER_MODEL
 
 class VoiceSpeech:
@@ -29,7 +30,6 @@ class VoiceSpeech:
             return
         print(f"ShadowDragon: {text}")
         try:
-            # Command: echo "text" | piper --model model.onnx --output_raw | aplay
             wav_path = "response.wav"
             
             # Resolve model path
@@ -38,12 +38,25 @@ class VoiceSpeech:
                 # Try relative to shadowdragon folder
                 base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
                 model_path = os.path.join(base_dir, self.model)
-                
-            cmd = f'echo {text} | "{self.piper_exe}" --model "{model_path}" --output_file {wav_path}'
-            subprocess.run(cmd, shell=True, check=True)
             
-            # Use start to play wav on Windows
-            os.system(f"start /min powershell -c (New-Object Media.SoundPlayer '{wav_path}').PlaySync()")
+            # Securely execute Piper using stdin piping without shell=True
+            process = subprocess.Popen(
+                [self.piper_exe, "--model", model_path, "--output_file", wav_path],
+                stdin=subprocess.PIPE,
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE,
+                text=True
+            )
+            # Send text to stdin and wait for completion
+            stdout, stderr = process.communicate(input=text)
+            
+            if process.returncode != 0:
+                print(f"Piper error: {stderr}")
+                return
+            
+            # Play wav synchronously using native winsound on Windows to block execution and prevent feedback loop
+            if os.path.exists(wav_path):
+                winsound.PlaySound(wav_path, winsound.SND_FILENAME)
         except Exception as e:
             print(f"Error in TTS: {e}")
-            # Fallback to simple print if TTS fails
+

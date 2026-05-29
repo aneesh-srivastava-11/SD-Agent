@@ -23,12 +23,14 @@ class AppLauncher:
         return apps
 
     def launch(self, app_query):
+        if not self.apps:
+            return "No application shortcuts found in the Windows Start Menu."
         best_match, score = process.extractOne(app_query.lower(), self.apps.keys())
-        if score > 50:
+        if score >= 75:
             app_path = self.apps[best_match]
             try:
                 os.startfile(app_path)
                 return f"Launching {best_match}."
             except Exception as e:
                 return f"Error launching {best_match}: {e}"
-        return f"Could not find an app matching '{app_query}'."
+        return f"Could not find an app matching '{app_query}' (closest match was '{best_match}' with score {score})."
